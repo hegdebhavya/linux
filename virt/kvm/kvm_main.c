@@ -213,7 +213,6 @@ struct page *kvm_pfn_to_refcounted_page(kvm_pfn_t pfn)
 
 	return NULL;
 }
-
 /*
  * Switches to specified vcpu, until a matching vcpu_put()
  */
