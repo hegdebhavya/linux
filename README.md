@@ -1,5 +1,9 @@
 # CMPE283-Assignment-2 <br>
 
+Student Name : Bhavya Hegde
+email : bhavya.hegde@sjsu.edu
+
+
 ## Modify the CPUID emulation code in KVM to report back additional information when special CPUID leaf nodes are requested. 
 
  ### Implementation of CPUID leaf nodes 0x4FFFFFFC and 0x4FFFFFFD <hr style="border:2px solid gray">
