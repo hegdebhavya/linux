@@ -1,6 +1,6 @@
 # CMPE283-Assignment-2 <br>
 
-Student Name : Bhavya Hegde
+Student Name : Bhavya Hegde <br>
 email : bhavya.hegde@sjsu.edu
 
 
