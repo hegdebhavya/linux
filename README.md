@@ -80,7 +80,7 @@ sudo update-grub
 
 We observe that the Linux version has been upgraded to **6.1.0-rc6+** from the previous **5.15.0-53-generic**.
 
-  *  Next, I have modified the files /linux/arch/x86/kvm/cpuid.c and /linux/arch/x86/kvm/vmx/vmx.c to add the required variables and logic to add support for cpuid leaf nodes 0x4ffffffc and 0x4ffffffd. These changes are committed to the current GitHub repository and commits can be seen [b0f1c18]
+  *  Next, I have modified the files /linux/arch/x86/kvm/cpuid.c and /linux/arch/x86/kvm/vmx/vmx.c to add the required variables and logic to add support for cpuid leaf nodes 0x4ffffffc and 0x4ffffffd. These changes are committed to the current GitHub repository and commits can be seen [here](https://github.com/hegdebhavya/linux/commit/b0f1c18a54b1e92549034ab453affeccfb367bf0)
 
 * After the files are modified we build the modules again by running following commands
 
