@@ -33,6 +33,27 @@
 u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
 
+/*Function to check if the ecx value provided to CPUID is KVM valid */
+int check_kvm_valid(u32 ecx)
+{
+if (ecx == 5 || ecx == 6 || ecx == 11 || ecx == 17 || ecx == 65 || ecx == 66 || ecx == 69 || ecx == 70 || ecx == 71 || ecx == 72 || ecx == 73){
+return 0;
+}
+return 1;
+}
+
+/*Function to check if the ecx value provided to CPUID is SDM valid*/
+int check_sdm_valid(u32 ecx)
+{
+if (ecx == 35 || ecx == 38 || ecx == 42 || ecx < 0 || ecx > 75 ){
+return 0;
+}
+return 1;
+}
+
+
+
+
 u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
 	int feature_bit = 0;
@@ -1497,6 +1518,12 @@ u64 total_exit_time;
 EXPORT_SYMBOL(total_exits);
 EXPORT_SYMBOL(total_exit_time);
 
+u32 exit_reason_counter[76];
+EXPORT_SYMBOL(exit_reason_counter);
+u64 exit_reason_time[76];
+EXPORT_SYMBOL(exit_reason_time);
+
+
 
 int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 {
@@ -1518,6 +1545,52 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 		ebx = (tmp_time >> 32);
 		ecx = (tmp_time & 0xffffffff);	
 	}
+	/*CPUID Leaf node 0x4ffffffe support. Check if the subleaf value is valid in reference to SDM and KVM*/
+	else if(eax == 0x4ffffffe){
+		if(check_kvm_valid(ecx)){
+			if(check_sdm_valid(ecx)){
+				eax = exit_reason_counter[ecx]; /* Output the total count of  exit reason mentioned in ecx */
+			}
+			else {
+				eax = 0; /*Invalid subleaf output - SDM*/
+				ebx = 0;
+				ecx = 0;
+				edx = 0xffffffff;
+			}
+		}
+		else {
+			eax = 0; /*Invalid subleaf output - KVM*/
+			ebx = 0;
+			ecx = 0;
+			edx = 0;
+		}
+	}
+	/*CPUID Leaf node 0x4fffffff support. Check if the subleaf value is valid in reference to SDM and KVM*/
+	else if(eax == 0x4fffffff){
+		if(check_kvm_valid(ecx)){
+                        if(check_sdm_valid(ecx)){
+                                u64 tmp_time;
+                		tmp_time = exit_reason_time[ecx];
+                		ebx = (tmp_time >> 32); /*Output the total time required to process specific exit reason mentioned in ecx */
+                		ecx = (tmp_time & 0xffffffff);
+                        }
+                        else {
+                                eax = 0; /*Invalid subleaf output - SDM*/
+                                ebx = 0;
+                                ecx = 0;
+                                edx = 0xffffffff;
+                        }
+                }
+                else {
+                        eax = 0; /*Invalid subleaf output - KVM*/
+                        ebx = 0;
+                        ecx = 0;
+                        edx = 0;
+                }
+
+        }
+
+
 	else {
 		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	}

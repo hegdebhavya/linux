@@ -6282,13 +6282,21 @@ void dump_vmcs(struct kvm_vcpu *vcpu)
  * assistance.
  */
 static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
-{
+{	
+	extern u32 exit_reason_counter[76]; /*Counter for exit reasons - assignment 3*/
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
 	union vmx_exit_reason exit_reason = vmx->exit_reason;
 	u32 vectoring_info = vmx->idt_vectoring_info;
 	u16 exit_handler_index;
 	extern u32 total_exits;
 	total_exits++;
+	
+	
+
+
+
+
+
 
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
@@ -6444,6 +6452,11 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 
 	exit_handler_index = array_index_nospec((u16)exit_reason.basic,
 						kvm_vmx_max_exit_handlers);
+
+	printk("The exit reason is: 0x%x",exit_handler_index);
+	exit_reason_counter[exit_handler_index]+=1;
+
+
 	if (!kvm_vmx_exit_handlers[exit_handler_index])
 		goto unexpected_vmexit;
 
@@ -6468,14 +6481,31 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	u64 exit_start_time;
 	u64 exit_end_time;
 	u64 delta_exit_time;
+	u16 exit_handler_index;
 	int ret;
 	extern u64 total_exit_time;
+
+
+	extern u64 exit_reason_time[76]; /*Total time counter for specific exit reasons*/
+	struct vcpu_vmx *vmx = to_vmx(vcpu);
+	union vmx_exit_reason exit_reason = vmx->exit_reason;
+	exit_handler_index = array_index_nospec((u16)exit_reason.basic, kvm_vmx_max_exit_handlers);
+	
+
+
+
+
 	exit_start_time = rdtsc();
 	ret = __vmx_handle_exit(vcpu, exit_fastpath);
 	exit_end_time = rdtsc();
+
+
+
 	delta_exit_time  = exit_end_time - exit_start_time;
 
 	total_exit_time += delta_exit_time;
+	exit_reason_time[exit_handler_index]+=delta_exit_time;
+
 	/*
 	 * Exit to user space when bus lock detected to inform that there is
 	 * a bus lock in guest.
